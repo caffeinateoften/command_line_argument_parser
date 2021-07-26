@@ -8,7 +8,7 @@ ___
 # Examples
 
 If you ran:
-```
+```rust
 fn main() {
     let raw_args = env::args().collect::<Vec<_>>();
     let config = command_line_argument_parser::Config::new(raw_args).unwrap_or_else(|err| {
