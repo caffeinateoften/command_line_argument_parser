@@ -7,7 +7,7 @@ ___
 
 # Examples
 
-If you ran:
+In your code:
 ```rust
 fn main() {
     let raw_args = env::args().collect::<Vec<_>>();
@@ -22,14 +22,21 @@ fn main() {
 }
 ```
 
-You would get this Output:
+If you ran:
+
+```bash
+./your_program -abc --key=value
 ```
+
+You would get these enum debug values:
+```sh
 ShortOption("a")
 ShortOption("b")
 ShortOption("c")
 LongOption("key", "value")
 ```
 
+You use `config.options` to access these arg types and values.
 
 **TODO to mature this from POC into publishable crate:**
 - improve this Readme to show example of actual enum usage
