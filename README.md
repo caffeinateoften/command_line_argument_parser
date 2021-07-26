@@ -2,7 +2,7 @@
 
 Parse command line arguments from raw strings into specific enum types.
 
-Good for building basic CLI programs or CLI frameworks
+Good for building basic CLI programs or CLI frameworks in rust.
 ___
 
 # Examples
