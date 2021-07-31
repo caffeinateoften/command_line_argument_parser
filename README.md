@@ -1,6 +1,4 @@
-# Rust Command Line Argument Parser
-
-Parse command line arguments from raw strings into specific enum types.
+# Rust Command Line Interface
 
 Good for building basic CLI programs or CLI frameworks in rust.
 ___
