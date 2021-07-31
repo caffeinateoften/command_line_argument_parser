@@ -1,5 +1,5 @@
 use std::{env};
-use command_line_interface::{Config, CommandLineInterface, CommandRequest};
+use command_line_interface::{Config, CommandLineInterface};
 fn main() -> Result<(), String> {
     let args = env::args().collect::<Vec<String>>();
 
