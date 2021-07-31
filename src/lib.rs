@@ -39,31 +39,33 @@ pub struct CommandLineInterface {
 }
 
 impl CommandLineInterface {
-    pub fn new(config: Config) -> Result<CommandLineInterface, String> {
+    pub fn new(config: Config) -> Result<Self, String> {
         Ok(CommandLineInterface {
             config
         })
     }
-}
 
-pub struct CommandRequest {
-    pub options: Vec<ShortOption>
-}
-
-impl CommandRequest {
-    pub fn new(input_args: &Vec<String>) -> Result<CommandRequest, String> {
+    pub fn create_command_request(&self, input_args: &Vec<String>)-> Result<CommandRequest, String>{
         todo!();
     }
 
-    fn parse_short_options(input_args: &Vec<String>) -> Result<Vec<String>, String> {
-        todo!(); 
+    fn parse_short_options() -> Result<Vec<ShortOption>, String> {
+        todo!();
+    }
+}
+
+pub struct CommandRequest {
+    options: Vec<ShortOption>
+}
+
+impl CommandRequest {
+    pub fn execute(&self) -> Result<(), String>{
+        todo!();
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::{process};
-
     use super::*;
 
     #[test]
@@ -82,7 +84,7 @@ mod tests {
 
         let input_arg_strings: Vec<String> = vec!["/file/path", "-a", "-bc", "-def"].into_iter().map(String::from).collect();
 
-        let command_request = CommandRequest::new(&input_arg_strings)?;
+        let command_request = cli.create_command_request(&input_arg_strings)?;
 
         assert_eq!(command_request.options, vec![
             ShortOption::WithoutArg('a'),

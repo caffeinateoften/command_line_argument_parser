@@ -13,11 +13,8 @@ fn main() -> Result<(), String> {
     ])?;
 
     let cli = CommandLineInterface::new(cli_config)?;
-    let command_request = CommandRequest::new(&args)?;
-
-    for option in command_request.options {
-        println!("{:?}", option);
-    }
+    let command_request = cli.create_command_request(&args)?;
+    command_request.execute()?;
 
     Ok(())
 }
