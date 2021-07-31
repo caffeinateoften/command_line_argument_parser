@@ -8,7 +8,7 @@ ___
 # Examples
 
 ```rust
-    fn command_request_will_contain_expected_arg_types() -> Result<(), String> {
+        fn command_request_will_contain_expected_arg_types() -> Result<(), String> {
 
         let cli_config = Config::new(vec![
             ('a', false),
@@ -23,7 +23,7 @@ ___
 
         let input_arg_strings: Vec<String> = vec!["/file/path", "-a", "-bc", "-def"].into_iter().map(String::from).collect();
 
-        let command_request = CommandRequest::new(&input_arg_strings)?;
+        let command_request = cli.create_command_request(&input_arg_strings)?;
 
         assert_eq!(command_request.options, vec![
             ShortOption::WithoutArg('a'),
