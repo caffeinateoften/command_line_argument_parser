@@ -1,13 +1,23 @@
-use std::{env, process};
-
-fn main() {
+use std::{env};
+use command_line_interface::{Config, CommandLineInterface, CommandRequest};
+fn main() -> Result<(), String> {
     let args = env::args().collect::<Vec<String>>();
-    let config = command_line_argument_parser::Config::new(&args).unwrap_or_else(|err| {
-        eprintln!("Problem parsing arguments: {}", err);
-        process::exit(1);
-    });
 
-    for option in config.options {
+    let cli_config = Config::new(vec![
+        ('a', false),
+        ('b', true),
+        ('c', false),
+        ('d', false),
+        ('e', false),
+        ('f', false)
+    ])?;
+
+    let cli = CommandLineInterface::new(cli_config)?;
+    let command_request = CommandRequest::new(&args)?;
+
+    for option in command_request.options {
         println!("{:?}", option);
     }
+
+    Ok(())
 }

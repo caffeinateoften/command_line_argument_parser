@@ -1,85 +1,62 @@
-#[macro_use]
-extern crate lazy_static;
-
-use regex::Regex;
-
 #[derive(Debug, PartialEq)]
-pub enum Arg {
-    LongOption(String, String),
-    ShortOption(String), // TODO: support short option values with ShortOption(String, Option<String>),
-    // TODO: support NonOption(String)
+pub enum ShortOption {
+    WithoutArg(char),
+    WithArg(char, String)
+}
+
+struct ShortOptionConfig {
+    name: char,
+    expect_arg: bool
+}
+
+impl ShortOptionConfig {
+    pub fn new(name: char, expect_arg: bool) -> Result<ShortOptionConfig, String> {
+        Ok(ShortOptionConfig{
+            name,
+            expect_arg
+        })
+    }
 }
 
 pub struct Config {
-    pub options: Vec<Arg>,
+    options: Vec<ShortOptionConfig>
 }
 
 impl Config {
-    /// creates Config struct with derived Arg kinds from vector of strings
-    ///
-    /// # Examples
-    /// ```
-    /// let arg_strings = vec!["/file/path".to_string(), "-ab".to_string(), "--myLongOption=value".to_string()];
-    /// let config = command_line_argument_parser::Config::new(&arg_strings).unwrap();
-    /// assert_eq!(config.options, vec![
-    ///     command_line_argument_parser::Arg::ShortOption(String::from("a")),
-    ///     command_line_argument_parser::Arg::ShortOption(String::from("b")),
-    ///     command_line_argument_parser::Arg::LongOption(String::from("myLongOption"), String::from("value")),
-    /// ]);
-    ///```
-    pub fn new(args: &Vec<String>) -> Result<Config, String> {
-        match Self::create_args(args) {
-            Ok(args) => Ok(Config {
-                options: args
-            }), 
-            Err(e) => Err(e)
-        }
+    pub fn new (config_inputs: Vec<(char, bool)>) -> Result<Config, String> {
+        let short_option_configs: Result<Vec<ShortOptionConfig>, _> = config_inputs
+            .into_iter()
+            .map(|c|ShortOptionConfig::new(c.0, c.1))
+            .collect();
+        
+        Ok(Config {
+            options: short_option_configs?
+        })
+    }
+}
+pub struct CommandLineInterface {
+    config: Config
+}
+
+impl CommandLineInterface {
+    pub fn new(config: Config) -> Result<CommandLineInterface, String> {
+        Ok(CommandLineInterface {
+            config
+        })
+    }
+}
+
+pub struct CommandRequest {
+    pub options: Vec<ShortOption>
+}
+
+impl CommandRequest {
+    pub fn new(input_args: &Vec<String>) -> Result<CommandRequest, String> {
+        todo!();
     }
 
-    /// Creates a list of Arg variants according to kind of argument detected
-    fn create_args(args: &Vec<String>) -> Result<Vec<Arg>, String> {
-        if args.len() == 1 {
-            return Ok(vec![])
-        }
-
-        lazy_static! {
-            // only alphanumeric characters
-            // TODO: Replace regex usage w/ loops
-            static ref SHORT_OPTION_RE: Regex = Regex::new(r"^-([a-zA-Z0-9]+)$").unwrap();
-            static ref LONG_OPTION_RE: Regex = Regex::new(r"^--([a-zA-Z0-9]+)=([a-zA-Z0-9]+)$").unwrap();
-            static ref NON_OPTION_RE: Regex = Regex::new(r"^([a-zA-Z0-9]+)$").unwrap();
-        }
-
-        let mut parsed_args: Vec<Arg> = Vec::new();
-        let e_msg = "Something went wrong when trying to derive arg(s).";
-
-        for s in args.into_iter().skip(1) {
-            let is_short_option = SHORT_OPTION_RE.is_match(s);
-            let is_long_option = LONG_OPTION_RE.is_match(s);
-            let is_option_terminator = s == "--";
-            if !is_short_option && !is_long_option && !is_option_terminator { // guard against invalid patterns
-                return Err(e_msg.to_string());
-            }
-            else if is_short_option {             // example without using regex capture group
-                for c in s.chars().skip(1) { // "-ab" skip the dash
-                parsed_args.push(Arg::ShortOption(c.to_string()));
-                }
-            }
-            else if is_long_option { // example with regex capture group
-                let caps = LONG_OPTION_RE.captures(s).ok_or(e_msg)?;
-                let key = caps.get(1).unwrap().as_str().to_string();
-                let value = caps.get(2).unwrap().as_str().to_string();
-                parsed_args.push(Arg::LongOption(key, value));
-            }
-        }
-
-
-        if parsed_args.is_empty() {
-            return Err(e_msg.to_string());
-        }
-        else {
-            return Ok(parsed_args);
-        }
+    fn parse_short_options(input_args: &Vec<String>) -> Result<Vec<String>, String> {
+        todo!(); 
     }
 }
 
@@ -90,20 +67,31 @@ mod tests {
     use super::*;
 
     #[test]
-    fn config_options_will_contain_appropriate_arg_types() {
-        // input
-        let arg_strings = vec!["/file/path".to_string(), "-ab".to_string(), "--myLongOption=value".to_string()];
+    fn command_request_will_contain_expected_arg_types() -> Result<(), String> {
 
-        // test
-        let config = Config::new(&arg_strings).unwrap_or_else(|err| {
-            eprintln!("Problem parsing arguments: {}", err);
-            process::exit(1);
-        });
+        let cli_config = Config::new(vec![
+            ('a', false),
+            ('b', true),
+            ('c', false),
+            ('d', false),
+            ('e', false),
+            ('f', false)
+        ])?;
 
-        assert_eq!(config.options, vec![
-            Arg::ShortOption(String::from("a")),
-            Arg::ShortOption(String::from("b")),
-            Arg::LongOption(String::from("myLongOption"), String::from("value")),
-        ])
+        let cli = CommandLineInterface::new(cli_config)?;
+
+        let input_arg_strings: Vec<String> = vec!["/file/path", "-a", "-bc", "-def"].into_iter().map(String::from).collect();
+
+        let command_request = CommandRequest::new(&input_arg_strings)?;
+
+        assert_eq!(command_request.options, vec![
+            ShortOption::WithoutArg('a'),
+            ShortOption::WithArg('b', "c".to_string()),
+            ShortOption::WithoutArg('d'),
+            ShortOption::WithoutArg('e'),
+            ShortOption::WithoutArg('f'),
+        ]);
+
+        Ok(())
     }
 }
