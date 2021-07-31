@@ -8,7 +8,10 @@ ___
 # Examples
 
 ```rust
-        fn command_request_will_contain_expected_arg_types() -> Result<(), String> {
+    use std::{env};
+    use command_line_interface::{Config, CommandLineInterface, CommandRequest};
+    fn main() -> Result<(), String> {
+        let args = env::args().collect::<Vec<String>>();
 
         let cli_config = Config::new(vec![
             ('a', false),
@@ -20,18 +23,8 @@ ___
         ])?;
 
         let cli = CommandLineInterface::new(cli_config)?;
-
-        let input_arg_strings: Vec<String> = vec!["/file/path", "-a", "-bc", "-def"].into_iter().map(String::from).collect();
-
-        let command_request = cli.create_command_request(&input_arg_strings)?;
-
-        assert_eq!(command_request.options, vec![
-            ShortOption::WithoutArg('a'),
-            ShortOption::WithArg('b', "c".to_string()),
-            ShortOption::WithoutArg('d'),
-            ShortOption::WithoutArg('e'),
-            ShortOption::WithoutArg('f'),
-        ]);
+        let command_request = cli.create_command_request(&args)?;
+        command_request.execute()?;
 
         Ok(())
     }
