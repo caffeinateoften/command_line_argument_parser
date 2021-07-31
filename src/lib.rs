@@ -24,9 +24,10 @@ pub struct Config {
 
 impl Config {
     pub fn new (config_inputs: Vec<(char, bool)>) -> Result<Config, String> {
+        let tuple_to_short_option_config = |t: (char, bool)|ShortOptionConfig::new(t.0, t.1);
         let short_option_configs: Result<Vec<ShortOptionConfig>, _> = config_inputs
             .into_iter()
-            .map(|c|ShortOptionConfig::new(c.0, c.1))
+            .map(tuple_to_short_option_config)
             .collect();
         
         Ok(Config {
