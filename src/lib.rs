@@ -18,7 +18,7 @@ impl ShortOptionConfig {
     }
 }
 
-pub struct Config {
+struct Config {
     options: Vec<ShortOptionConfig>
 }
 
@@ -40,7 +40,8 @@ pub struct CommandLineInterface {
 }
 
 impl CommandLineInterface {
-    pub fn new(config: Config) -> Result<Self, String> {
+    pub fn new(config_inputs: Vec<(char, bool)>) -> Result<Self, String> {
+        let config = Config::new(config_inputs)?;
         Ok(CommandLineInterface {
             config
         })
@@ -71,8 +72,8 @@ mod tests {
 
     #[test]
     fn command_request_will_contain_expected_arg_types() -> Result<(), String> {
-
-        let cli_config = Config::new(vec![
+        
+        let cli = CommandLineInterface::new(vec![
             ('a', false),
             ('b', true),
             ('c', false),
@@ -80,8 +81,6 @@ mod tests {
             ('e', false),
             ('f', false)
         ])?;
-
-        let cli = CommandLineInterface::new(cli_config)?;
 
         let input_arg_strings: Vec<String> = vec!["/file/path", "-a", "-bc", "-def"].into_iter().map(String::from).collect();
 

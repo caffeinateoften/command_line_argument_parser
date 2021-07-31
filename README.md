@@ -7,11 +7,11 @@ ___
 
 ```rust
     use std::{env};
-    use command_line_interface::{Config, CommandLineInterface, CommandRequest};
+    use command_line_interface::{CommandLineInterface};
     fn main() -> Result<(), String> {
         let args = env::args().collect::<Vec<String>>();
-
-        let cli_config = Config::new(vec![
+        
+        let cli = CommandLineInterface::new(vec![
             ('a', false),
             ('b', true),
             ('c', false),
@@ -19,8 +19,6 @@ ___
             ('e', false),
             ('f', false)
         ])?;
-
-        let cli = CommandLineInterface::new(cli_config)?;
         let command_request = cli.create_command_request(&args)?;
         command_request.execute()?;
 
