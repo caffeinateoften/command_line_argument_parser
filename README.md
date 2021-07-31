@@ -8,41 +8,31 @@ ___
 # Examples
 
 ```rust
-let arg_strings = vec!["/file/path".to_string(), "-ab".to_string(), "--myLongOption=value".to_string()];
-let config = command_line_argument_parser::Config::new(&arg_strings).unwrap();
-assert_eq!(config.options, vec![
-    command_line_argument_parser::Arg::ShortOption(String::from("a")),
-    command_line_argument_parser::Arg::ShortOption(String::from("b")),
-    command_line_argument_parser::Arg::LongOption(String::from("myLongOption"), String::from("value")),
-]);
-```
+    fn command_request_will_contain_expected_arg_types() -> Result<(), String> {
 
-Given this code:
-```rust
-fn main() {
-    let args = env::args().collect::<Vec<String>>();
-    let config = command_line_argument_parser::Config::new(&args).unwrap_or_else(|err| {
-        eprintln!("Problem parsing arguments: {}", err);
-        process::exit(1);
-    });
+        let cli_config = Config::new(vec![
+            ('a', false),
+            ('b', true),
+            ('c', false),
+            ('d', false),
+            ('e', false),
+            ('f', false)
+        ])?;
 
-    for option in config.options {
-        println!("{:?}", option);
+        let cli = CommandLineInterface::new(cli_config)?;
+
+        let input_arg_strings: Vec<String> = vec!["/file/path", "-a", "-bc", "-def"].into_iter().map(String::from).collect();
+
+        let command_request = CommandRequest::new(&input_arg_strings)?;
+
+        assert_eq!(command_request.options, vec![
+            ShortOption::WithoutArg('a'),
+            ShortOption::WithArg('b', "c".to_string()),
+            ShortOption::WithoutArg('d'),
+            ShortOption::WithoutArg('e'),
+            ShortOption::WithoutArg('f'),
+        ]);
+
+        Ok(())
     }
-}
 ```
-
-If you ran:
-```bash
-./your_program -abc --key=value
-```
-
-You would see these values:
-```sh
-ShortOption("a")
-ShortOption("b")
-ShortOption("c")
-LongOption("key", "value")
-```
-
-
