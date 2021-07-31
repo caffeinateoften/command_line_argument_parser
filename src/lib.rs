@@ -1,40 +1,3 @@
-#[derive(Debug, PartialEq)]
-pub enum ShortOption {
-    WithoutArg(char),
-    WithArg(char, String)
-}
-
-struct ShortOptionConfig {
-    name: char,
-    expect_arg: bool
-}
-
-impl ShortOptionConfig {
-    pub fn new(name: char, expect_arg: bool) -> Result<ShortOptionConfig, String> {
-        Ok(ShortOptionConfig{
-            name,
-            expect_arg
-        })
-    }
-}
-
-struct Config {
-    options: Vec<ShortOptionConfig>
-}
-
-impl Config {
-    pub fn new (config_inputs: Vec<(char, bool)>) -> Result<Config, String> {
-        let tuple_to_short_option_config = |t: (char, bool)|ShortOptionConfig::new(t.0, t.1);
-        let short_option_configs: Result<Vec<ShortOptionConfig>, _> = config_inputs
-            .into_iter()
-            .map(tuple_to_short_option_config)
-            .collect();
-        
-        Ok(Config {
-            options: short_option_configs?
-        })
-    }
-}
 pub struct CommandLineInterface {
     config: Config
 }
@@ -66,13 +29,51 @@ impl CommandRequest {
     }
 }
 
+struct Config {
+    options: Vec<ShortOptionConfig>
+}
+
+impl Config {
+    pub fn new (config_inputs: Vec<(char, bool)>) -> Result<Config, String> {
+        let tuple_to_short_option_config = |t: (char, bool)|ShortOptionConfig::new(t.0, t.1);
+        let short_option_configs: Result<Vec<ShortOptionConfig>, _> = config_inputs
+            .into_iter()
+            .map(tuple_to_short_option_config)
+            .collect();
+        
+        Ok(Config {
+            options: short_option_configs?
+        })
+    }
+}
+
+#[derive(Debug, PartialEq)]
+enum ShortOption {
+    WithoutArg(char),
+    WithArg(char, String)
+}
+
+struct ShortOptionConfig {
+    name: char,
+    expect_arg: bool
+}
+
+impl ShortOptionConfig {
+    pub fn new(name: char, expect_arg: bool) -> Result<ShortOptionConfig, String> {
+        Ok(ShortOptionConfig{
+            name,
+            expect_arg
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn command_request_will_contain_expected_arg_types() -> Result<(), String> {
-        
+
         let cli = CommandLineInterface::new(vec![
             ('a', false),
             ('b', true),
